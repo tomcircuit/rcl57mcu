@@ -1,0 +1,21 @@
+--cpu Cortex-M3
+".\objects\main.o"
+".\objects\ti57.o"
+".\objects\rom57.o"
+".\objects\state57.o"
+".\objects\utils57.o"
+".\objects\mux57.o"
+".\objects\usart_utilities.o"
+".\objects\key57.o"
+".\objects\cat4016.o"
+".\objects\misc.o"
+".\objects\stm32f10x_gpio.o"
+".\objects\stm32f10x_rcc.o"
+".\objects\stm32f10x_spi.o"
+".\objects\stm32f10x_usart.o"
+".\objects\startup_stm32f10x_md.o"
+".\objects\system_stm32f10x.o"
+--strict --scatter ".\Objects\ti57_stm32f103.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\ti57_stm32f103.map" -o .\Objects\ti57_stm32f103.axf

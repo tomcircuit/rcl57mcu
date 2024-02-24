@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings version="1.0">
+	<category name="app_ti57.c">
+		<category name="Window">
+			<property name="Left" type="integer">4294967287</property>
+			<property name="Top" type="integer">4294967258</property>
+			<property name="Right" type="integer">1625</property>
+			<property name="Bottom" type="integer">587</property>
+			<property name="Maximized" type="integer">1</property>
+			<property name="Active" type="integer">1</property>
+		</category>
+	</category>
+	<category name="utils57.c">
+		<category name="Window">
+			<property name="Left" type="integer">32</property>
+			<property name="Top" type="integer">32</property>
+			<property name="Right" type="integer">1470</property>
+			<property name="Bottom" type="integer">465</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="ti57.c">
+		<category name="Window">
+			<property name="Left" type="integer">64</property>
+			<property name="Top" type="integer">64</property>
+			<property name="Right" type="integer">1502</property>
+			<property name="Bottom" type="integer">497</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="ti57.h">
+		<category name="Window">
+			<property name="Left" type="integer">96</property>
+			<property name="Top" type="integer">96</property>
+			<property name="Right" type="integer">1534</property>
+			<property name="Bottom" type="integer">529</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="state57.h">
+		<category name="Window">
+			<property name="Left" type="integer">128</property>
+			<property name="Top" type="integer">128</property>
+			<property name="Right" type="integer">1566</property>
+			<property name="Bottom" type="integer">561</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="key57.h" />
+	<category name="mux57.h">
+		<category name="Window">
+			<property name="Left" type="integer">160</property>
+			<property name="Top" type="integer">160</property>
+			<property name="Right" type="integer">1598</property>
+			<property name="Bottom" type="integer">593</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="mux57.c">
+		<category name="Window">
+			<property name="Left" type="integer">192</property>
+			<property name="Top" type="integer">192</property>
+			<property name="Right" type="integer">1630</property>
+			<property name="Bottom" type="integer">625</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="utils57.h">
+		<category name="Window">
+			<property name="Left" type="integer">0</property>
+			<property name="Top" type="integer">0</property>
+			<property name="Right" type="integer">1438</property>
+			<property name="Bottom" type="integer">433</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="state57.c">
+		<category name="Window">
+			<property name="Left" type="integer">32</property>
+			<property name="Top" type="integer">32</property>
+			<property name="Right" type="integer">1470</property>
+			<property name="Bottom" type="integer">465</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="key57.c">
+		<category name="Window">
+			<property name="Left" type="integer">64</property>
+			<property name="Top" type="integer">64</property>
+			<property name="Right" type="integer">1276</property>
+			<property name="Bottom" type="integer">497</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+</settings>
