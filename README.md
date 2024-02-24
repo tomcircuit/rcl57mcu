@@ -22,7 +22,9 @@ The 'guts' of the TMC1500 emulation are all contained within the 'engine' folder
 
 I began to hatch a scheme - could I put a modern microcontroller (MCU) to the task of emulating the 1970's TMC1501? Could this hardware emulator be then installed into my defunct TI-57 to make it live again, perhaps even better than before?
 
-See the hackaday page for more info on this project!
+See the hackaday page for more info on this project: 
+
+https://hackaday.io/project/194963-ti-57-programmable-calculator-hardware-retrofit
 
 Tom LeMense
 February 2024

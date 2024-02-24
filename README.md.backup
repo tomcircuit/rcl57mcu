@@ -1,6 +1,6 @@
 # rcl57mcu
 
-MCU-based retrofit to TI-57 Programmable Calculators
+## MCU-based retrofit for TI-57 Programmable Calculators
 
 This project came about because I stumbled across a TI-57 calculator with a "bad brain". The TMC1501 calculator-on-a-chip was faulty. This, in turn, led me to read more about this particular calculator and how the CPU inside functions. 
 
@@ -21,3 +21,8 @@ The 'guts' of the TMC1500 emulation are all contained within the 'engine' folder
 ## The Quest
 
 I began to hatch a scheme - could I put a modern microcontroller (MCU) to the task of emulating the 1970's TMC1501? Could this hardware emulator be then installed into my defunct TI-57 to make it live again, perhaps even better than before?
+
+See the hackaday page for more info on this project!
+
+Tom LeMense
+February 2024
