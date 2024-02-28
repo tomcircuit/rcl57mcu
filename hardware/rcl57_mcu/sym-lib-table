@@ -1,0 +1,5 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "ti57_library")(type "KiCad")(uri "${KIPRJMOD}/ti57_library.kicad_sym")(options "")(descr ""))
+  (lib (name "RapidStencil")(type "Legacy")(uri "C:/Users/lemenset/Personal/RapidStencil/RapidStencil.lib")(options "")(descr ""))
+)

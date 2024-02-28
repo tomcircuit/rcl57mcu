@@ -1,0 +1,55 @@
+(kicad_sch (version 20230121) (generator eeschema)
+
+  (uuid f5b7da76-c753-4b6b-a2e1-bd7292b9f5ec)
+
+  (paper "A4")
+
+  (title_block
+    (title "RCL57 Retrofit PSU and Debug")
+    (date "2024-02-28")
+    (rev "1")
+    (company "tomcircuit")
+  )
+
+  (lib_symbols
+  )
+
+
+  (sheet (at 109.22 119.38) (size 66.04 34.29) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 4e503d36-7f5e-4e77-a626-f739ffcd800e)
+    (property "Sheetname" "RCL557 Retrofit - Debug Board" (at 109.22 118.0334 0)
+      (effects (font (size 2.54 2.54)) (justify left bottom))
+    )
+    (property "Sheetfile" "rcl57_debug.kicad_sch" (at 109.22 154.7626 0)
+      (effects (font (size 2.54 2.54)) (justify left top))
+    )
+    (instances
+      (project "rcl57_debug_psu"
+        (path "/f5b7da76-c753-4b6b-a2e1-bd7292b9f5ec" (page "4"))
+      )
+    )
+  )
+
+  (sheet (at 107.95 45.72) (size 66.04 60.96) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 96f6825a-621d-4bd1-b6aa-ead3817c96f3)
+    (property "Sheetname" "RCL57 Retrofit - PSU Board" (at 107.95 44.3734 0)
+      (effects (font (size 2.54 2.54)) (justify left bottom))
+    )
+    (property "Sheetfile" "rcl57_psu.kicad_sch" (at 107.95 107.7726 0)
+      (effects (font (size 2.54 2.54)) (justify left top))
+    )
+    (instances
+      (project "rcl57_debug_psu"
+        (path "/f5b7da76-c753-4b6b-a2e1-bd7292b9f5ec" (page "3"))
+      )
+    )
+  )
+
+  (sheet_instances
+    (path "/" (page "1"))
+  )
+)
