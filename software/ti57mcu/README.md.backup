@@ -4,8 +4,10 @@
 * Toolchain: Keil uVision/MDK
 * Target: STM32F103TB (CM3, 128K Flash, 20K RAM)
 * Hardware: rcl57mcu PCB V2
-* Repository: [github.com/tomcircuit/rcl57mcu](https://github.com/tomcircuit/rcl57mcu)
-* Project Webpage: [hackaday.io/project/194963](https://hackaday.io/project/194963)
+
+Repository: [github.com/tomcircuit/rcl57mcu](https://github.com/tomcircuit/rcl57mcu)
+
+Project Webpage: [hackaday.io/project/194963](https://hackaday.io/project/194963)
 
 Rcl57mcu was inspired by the work of Jeff Parsons and Paul Novaes, from whose work I was able to develop a microcontroller-based TI-57 emulator. The rcl57mcu embedded software is more a less an embedded
 'wrapper' around the RCL57 "Engine" by Jeff Parsons, which can be found on his wepage [here](https://www.pcjs.org/machines/ti/ti57). 
