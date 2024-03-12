@@ -7,7 +7,7 @@
 * Repository: [github.com/tomcircuit/rcl57mcu](https://github.com/tomcircuit/rcl57mcu)
 * Project Webpage: [hackaday.io/project/194963](https://hackaday.io/project/194963)
 
-Rcl57mcu was inspired by the work of Jeff Parsons and Paul Novaes, from whose work I was able to study and then eventually develop a microcontroller-based TI-57 emulator. The rcl57mcu embedded software is more a less an embedded 'wrapper' around the "TI57 Engine" by Paul Novaes, which can be found in this repository: [github.com/n3times/rcl57](https://github.com/n3times/rcl57). 
+Rcl57mcu was inspired by the work of Jeff Parsons and Paul Novaes, from whose work developoing PC and iOS emulators I was able to study and then eventually develop a microcontroller-based TI-57 emulator. Also invaluable to me is the DATAMATH website, carefully maintained by Joerg Woerner, which contains a trove of information on all things TI calculator, but more specifically on [the TMC1501 IC inside the TI-57](http://www.datamath.org/Chips/TMC1500.htm). The rcl57mcu embedded software is more a less an embedded 'wrapper' around the "TI57 Engine" by Paul Novaes, which can be found in this repository: [github.com/n3times/rcl57](https://github.com/n3times/rcl57). 
 
 Rcl57mcu is a hardware "drop-in" replacement for TI-57 TMC1500 DIP-28, and brings a few enhancements over the original:
  
