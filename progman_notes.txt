@@ -1,0 +1,47 @@
+ From TI patent, the ORDER of the segment activation
+ 7,6,5,2,4,0,1,3
+ (don't really care about this so much I don't think)
+ 
+Segment numbering:
+E, F, B, G, C, A, D, P
+0  1  2  3  4  5  6  7  (WVU)
+
+This makes the keyboard mapping sane, also, as the segment # is then the row #
+
+
+
+
+
+   1  1  1        
+   2  1  0  9  8  7  6  5  4  3  2  1
+   
+      L. #  #     C  C  C  C         	These are the "library" flash programs   21-99
+   
+      U. #  #     C  C  C  C				These are the "user" EEPROM programs   01-20
+		 
+		 
+		 ## is program number
+		 CCCC is CRC-16 of program (or "- - - -" if blank)
+		 
+	  
++ increase #
+- decrease #	  
+STO store program in slot # if it's a USER slot (1-20)
+RCL recall program from slot #
+GTO goto L.21
+RST goto U.01
+CE clear program in slot # if it's a USER slot (1-20)
+R/S exit program manager
+	  
+	  
+Keep the same 50us tick:
+
+Enter with slot = 01
+
+
+generate_display_data
+
+display_cycle
+
+check_keyboard_input
+

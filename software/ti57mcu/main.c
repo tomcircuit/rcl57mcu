@@ -2,20 +2,12 @@
 #include "ti57.h"
 #include "mux57.h"
 #include "rcl57mcu.h"
+#include "psave.h"
+#include "uni_eeprom.h"
 
 /* Target: STM32F103TBU6 on RCL57 V2 PCB */
 
-/*
-    TMC1500 instruction period is 200us, and the DISPlay
-    cycle is 32x longer, or 6.4ms. For this retrofit
-    I go for 4x the speed instruction rate of TI-57
-    but keep the display cycle duration the same to
-    preserve the LED display characteristics and other
-    TI-57 ROM timing.
-*/
-
 /* 36 MHz operating frequency - see RTE_Device.h */
-
 
 /* STM32F103 peripheral initialization prototypes*/
 void InitGPIO();
@@ -26,9 +18,6 @@ void InitSysTick();
 void SysTick_Handler(void);
 void Delay(__IO uint32_t nTime);
 
-/* PowerSave mode function */
-void mode_powersave(void);
-
 /* globals */
 static __IO uint32_t TimingDelay;
 
@@ -38,7 +27,7 @@ static __IO uint32_t TimingDelay;
 int main()
 {
     ti57_t ti57;
-    unsigned char scancode = 0; // row/col of keypress; e.g. 2ND = 0x11
+    unsigned char scancode = 0; // row/col of keypress; e.g. 2ND = 0x11 or 0x99 for ProgMan entry
     short cycle_cost = 0;
     unsigned long num_cycles = 0;
     unsigned long idle_disp_cycles = 0;
@@ -63,6 +52,21 @@ int main()
     // DEBUG turn off PC13 LED
     GPIOC->BSRR = GPIO_Pin_13;
 
+		// init the unieeprom
+		eeprom_standby();
+		
+		// set the unieeprom read address
+		eeprom_read_command(0x1234);
+		
+		// send some other bytes
+		eeprom_send_byte(0x56);
+		eeprom_send_byte(0x78);
+		eeprom_send_byte(0x9A);
+		eeprom_send_byte(0xBC);
+		
+    // DEBUG instruction duration tick on
+    GPIOC->BSRR = GPIO_Pin_14;
+		
     while (1)
     {
         // DEBUG instruction duration tick on
@@ -108,21 +112,34 @@ int main()
             /* do the 6.4ms display cycle, collect keyboard scan codes */
             scancode = hw_display_cycle(ti57.dA, ti57.dB);
 
+            /* increment the idle keyboard cycle counter if no keys detected */
+            if (scancode == 0)
+            {
+                idle_disp_cycles += 1;
+            }
             /* if any single keys were pressed during this display cycle,
-                 copy the keypress information into ti57 structure */
-            if (scancode != 0)
+               copy the keypress information into ti57 structure and let
+                           the TI-57 emulation take care of what to do */
+            else if (scancode < 0x8F)
             {
                 ti57.row = scancode >> 4;
                 ti57.col = scancode & 0x0F;
                 ti57.is_key_pressed = true;
                 idle_disp_cycles = 0;       // clear the idle keyboard counter
             }
-            else
-                idle_disp_cycles += 1;  // increment the idle keyboard counter
+            /* if 2ND+INV+CLR is pressed, enter PROGRAM MANAGER */
+            else if (scancode == SCANCODE_PROGMAN_ENTRY)
+            {
+                scancode = 0;
+                //mode_progman();
+            }
 
             /* has the keyboard been idle too long? if so, go to powersave */
-            if (idle_disp_cycles > IDLE_DISP_CYCLE_TIMEOUT)
+            if (idle_disp_cycles > PSAVE_ENTRY_IDLE_DISP_CYCLES)
+            {
+                scancode = 0;
                 mode_powersave();
+            }
         }
 
         else
@@ -180,10 +197,10 @@ void InitGPIO()
     /* Configure PB0 as OD GPIO */
     /* This is 11AA080 UNI/O signal input-output with 47K pullup */
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
-    GPIO_SetBits(GPIOB, GPIO_Pin_0);
+    GPIO_ResetBits(GPIOB, GPIO_Pin_0);
 
     /* Configure PB4 as OD GPIO */
     /* This is a 'direct drive' for digit #12 cathode */
@@ -267,50 +284,3 @@ void Delay(__IO uint32_t nTime)
     while (TimingDelay != 0);
 }
 
-
-/* power save mode function */
-void mode_powersave(void)
-{
-    unsigned char scancode = 0;
-
-    /* make sure TLC5929 is in PowerSave mode */
-    hw_digit_driver_load(0);
-
-    while (scancode == 0)
-    {
-        /* set SysTick to a much slower interval to conserve battery power */
-        SysTick_Config(SystemCoreClock / IDLE_SYSTICK_TIMER_FREQ);
-
-        /* turn OFF the D12 direct output */
-        GPIOB->BSRR = GPIO_Pin_4;
-
-        /* enable all segment drivers to scan all keyboard rows */
-        hw_segment_enable_all();
-
-        /* delay in standby mode for PSAVE_IDLE_TICKS * IDLE_SYSTICK_PERIOD_US. Read keys between timeouts */
-        for (long u = PSAVE_IDLE_TICKS; u > 0; u--)
-        {
-            if (scancode == 0)
-            {
-                __WFI();
-                scancode = (GPIO_ReadInputData(GPIOA) & 0x001f);
-            }
-        }
-
-        // DEBUG turn on the BluePill LED
-        GPIOC->BRR = GPIO_Pin_13;
-
-        /* set SysTick back to normal interval during display time */
-        SysTick_Config(SystemCoreClock / SYSTICK_TIMER_FREQ);
-
-        /* blink the decimal point at digit 12 while in powersave mode */
-        for (int u = PSAVE_BLINK_TICKS; u > 0; u--)
-        {
-            if (scancode == 0)
-                /* do a 6.4ms display cycle using only D12 */
-                scancode = hw_display_char_d12(CHAR_CODE_POINT);
-        }
-        // DEBUG turn off the BluePill LED
-        GPIOC->BSRR = GPIO_Pin_13;
-    }
-}

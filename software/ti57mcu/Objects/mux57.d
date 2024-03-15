@@ -1,6 +1,5 @@
-./objects/stm32f10x_tim.o: \
-  C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\src\stm32f10x_tim.c \
-  C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_tim.h \
+./objects/mux57.o: mux57.c mux57.h state57.h \
+  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdbool.h key57.h op57.h \
   C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\Include\stm32f10x.h \
   RTE\_Target_1\RTE_Components.h \
   C:\Users\lemenset\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include\core_cm3.h \
@@ -12,5 +11,7 @@
   RTE\Device\STM32F103TB\stm32f10x_conf.h \
   C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_gpio.h \
   C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_rcc.h \
+  C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_tim.h \
   C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_usart.h \
-  C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\misc.h
+  C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\misc.h \
+  rcl57mcu.h

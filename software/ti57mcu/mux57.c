@@ -93,8 +93,8 @@ const char SEGMENT_MAP[32][8] =
     /*U*/ {1, 1, 1, 0, 1, 0, 1, 0}, // 25 B-C-D-E-F-G
     /*Y*/ {0, 1, 1, 1, 1, 0, 1, 0}, // 26 B-C-D-F-G
     /*"*/ {0, 1, 1, 0, 0, 0, 0, 0}, // 27 B-F
-		/*^*/ {0, 1, 1, 0, 0, 1, 0, 0}, // 28 A-B-F
-		/*.*/ {0, 0, 0, 0, 0, 0, 0, 1}, // 29 DP
+    /*^*/ {0, 1, 1, 0, 0, 1, 0, 0}, // 28 A-B-F
+    /*.*/ {0, 0, 0, 0, 0, 0, 0, 1}, // 29 DP
     /*-*/ {0, 0, 0, 1, 0, 0, 0, 0}, // 30 G
     /* */ {0, 0, 0, 0, 0, 0, 0, 0}  // 31 <none>
     /*     E  F  B  G  C  A  D  P   */
@@ -229,6 +229,7 @@ unsigned char hw_display_cycle(ti57_reg_t* digits, ti57_reg_t* mask)
 {
     unsigned char segment = 0;  // segment counter 0-7
     unsigned int d_outputs = 0; // digit driver output data
+    unsigned int k_inputs = 0;  // keyboard column inputs
     unsigned char scancode = 0; // keyboard scancode
 
     /* preload the TLC5929 SR with SEGMENT E (#0) digit outputs */
@@ -286,6 +287,10 @@ unsigned char hw_display_cycle(ti57_reg_t* digits, ti57_reg_t* mask)
 
     /* update the TLC5929 to all outputs off (enter power-save mode) */
     hw_digit_driver_update();
+
+    /* Scancode = 100 if Program Manager should be entered - 2ND + INV + CLR */
+    if (hw_raw_keyboard_row(0) == 0x13)
+        scancode = 100;
 
     return scancode;
 }
