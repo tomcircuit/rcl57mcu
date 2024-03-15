@@ -24,9 +24,9 @@ void InitTIM3()
     TIM_DeInit(TIM3);
 
     /* Init the TimeBaseInitStructure with 500ns/tick values */
-    TimeBaseInitStructure.TIM_Prescaler = 18 - 1;
+    TimeBaseInitStructure.TIM_Prescaler = (SystemCoreClock / 2000000) - 1;
     TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TimeBaseInitStructure.TIM_Period = 10 ;
+    TimeBaseInitStructure.TIM_Period = 10;
     TIM_TimeBaseInit(TIM3, &TimeBaseInitStructure);
     TIM_SelectOnePulseMode(TIM3, TIM_OPMode_Single);
 }

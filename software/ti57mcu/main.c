@@ -7,7 +7,7 @@
 
 /* Target: STM32F103TBU6 on RCL57 V2 PCB */
 
-/* 36 MHz operating frequency - see RTE_Device.h */
+/* 24 MHz operating frequency - see RTE_Device.h */
 
 /* STM32F103 peripheral initialization prototypes*/
 void InitGPIO();
@@ -52,21 +52,6 @@ int main()
     // DEBUG turn off PC13 LED
     GPIOC->BSRR = GPIO_Pin_13;
 
-		// init the unieeprom
-		eeprom_standby();
-		
-		// set the unieeprom read address
-		eeprom_read_command(0x1234);
-		
-		// send some other bytes
-		eeprom_send_byte(0x56);
-		eeprom_send_byte(0x78);
-		eeprom_send_byte(0x9A);
-		eeprom_send_byte(0xBC);
-		
-    // DEBUG instruction duration tick on
-    GPIOC->BSRR = GPIO_Pin_14;
-		
     while (1)
     {
         // DEBUG instruction duration tick on
@@ -85,13 +70,6 @@ int main()
             ti57.is_key_pressed = true;
             ti57.col = 5;
             ti57.row = 2;       // this is 1/x which will cause error displey
-        }
-
-        /* DEBUG dump keypress row,col to UART */
-        if (ti57.is_key_pressed)
-        {
-            UU_PutNumber(USART1, ti57.row);
-            UU_PutNumber(USART1, ti57.col);
         }
 
         /* check if display action is required */
@@ -142,9 +120,15 @@ int main()
             }
         }
 
-        else
-            /* wait for remainder of SysTick interval in SLEEP mode */
-            __WFI();
+        /* DEBUG dump keypress row,col to UART */
+        if (ti57.is_key_pressed)
+        {
+            UU_PutNumber(USART1, ti57.row);
+            UU_PutNumber(USART1, ti57.col);
+        }
+
+        /* wait for remainder of SysTick interval in SLEEP mode */
+        __WFI();
     }
 }
 
