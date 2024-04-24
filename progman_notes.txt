@@ -45,3 +45,39 @@ display_cycle
 
 check_keyboard_input
 
+
+
+
+10-100KHz
+100us to 10us
+DATA 0 ---> MARK/SPACE
+DATA 1 ---> SPACE/MARK
+MAK == DATA 1
+NoMAK == DATA 0
+SAK == DATA 1
+NoSAK = CV (MARK-MARK)
+
+STANDBY PULSE (TSTBY #9) = HIGH for 600us minimum (!!!)
+START HEADER SETUP TIME (TSS #10) = 10us minimum (can do this instead of STANDBY pulse)
+START HEADER LOW PULSE TIME (THDR #11) = 5us minimum (follows standby/header pulse)
+
+START HEADER = 0x55 + MAK 
+
+
+MEMIO high for TSS, then MEMIO low for THDR, then 0x55, then MAK, then NoSAK (don't check SAK)
+
+
+
+24MHz clock to APB1
+TIM3 :
+
+RCC->APB1ENR |= RCC_APB1ENR_TIM3EN
+
+TIM3->PSC = 24-1; // 24MHz APB1 divide-by-24 = 1MHz = 1us per tick
+TIM3->ARR = ticks-1;  // number of ticks to count up
+TIM3->EGR = 0x0001;   // update event
+TIM3->CR1 = 0x0009;	 // enable counting     but also set: OPM (b3 = 1 to count only once), 
+
+NVIC->ISER[TIM3_IRQn >> 0x05] = (uint32_t)0x01 << (TIM3_IRQn & (uint8_t)0x1f); enable interrupts
+TIM3->DIER = 0x0001; enable interrupts
+

@@ -1,0 +1,23 @@
+﻿pos_x,pos_y,rotation,side,designator,mpn,pack,value,mount_type,place
+148.3,-110.9,180.0,bottom,C1,,C_0805_2012Metric,100nF,smt,True
+145.0,-109.9,90.0,bottom,C2,,C_0805_2012Metric,100nF,smt,True
+142.9,-84.9,-90.0,bottom,C3,,C_0805_2012Metric,4.7uF,smt,True
+141.3,-92.8,-135.0,bottom,C4,,C_0805_2012Metric,100nF,smt,True
+140.3,-84.9,-90.0,bottom,C5,,C_0805_2012Metric,100nF,smt,True
+145.1,-84.9,-90.0,bottom,C6,,C_0805_2012Metric,4.7uF,smt,True
+137.16,-82.147058,180.0,bottom,J1,,PinHeader_1x13_P2.54mm_Vertical,TMC1500 p1-13,tht,True
+152.36,-82.147056,180.0,bottom,J2,,PinHeader_1x13_P2.54mm_Vertical,TMC1500 p28-16,tht,True
+137.9,-115.6,90.0,top,J3,,PinHeader_1x08_P2.00mm_Vertical,STLINK,tht,True
+148.7,-83.3,0.0,top,Q1,,SOT-23-6,DMP2240UDM-7,smt,True
+148.7,-92.2,0.0,top,Q2,,SOT-23-6,DMP2240UDM-7,smt,True
+148.7,-96.1,0.0,top,Q3,,SOT-23-6,DMP2240UDM-7,smt,True
+148.7,-87.2,0.0,top,Q4,,SOT-23-6,DMP2240UDM-7,smt,True
+147.3,-84.9,-90.0,bottom,R1,,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,2K,smt,True
+142.7,-98.7,90.0,top,R3,,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,47K,smt,True
+148.3,-104.4,180.0,bottom,R4,,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,330,smt,True
+148.3,-107.6,180.0,bottom,RN1,,R_Array_Convex_5x0603,"YC158TJR-072KL
+",smt,True
+144.859999,-107.309585,135.0,top,U1,,QFN-36-1EP_6x6mm_P0.5mm_EP4.1x4.1mm,STM32F103TBUx,smt,True
+144.859999,-96.647056,45.0,bottom,U2,,TSSOP-24-1EP_4.4x7.8mm_P0.65mm_EP3.2x5mm,TLC5929PWP,smt,True
+141.26,-84.25,0.0,top,U3,,SOT-23-5,TLV70033_SOT23-5,smt,True
+143.2,-93.3,-90.0,top,U4,,SOT-23,11AA080/TT,smt,True

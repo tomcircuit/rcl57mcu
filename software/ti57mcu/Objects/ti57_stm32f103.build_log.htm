@@ -21,31 +21,33 @@ Target DLL:      STLink\ST-LINKIII-KEIL_SWO.dll V3.0.9.0
 Dialog DLL:      TCM.DLL V1.53.0.0
  
 <h2>Project:</h2>
-C:\Users\lemenset\Personal\TI57_upgrade\software\ti57mcu\ti57_stm32f103.uvprojx
-Project File Date:  03/15/2024
+C:\Users\lemenset\Personal\TI57_upgrade\software\ti57mcu_v2pcb\ti57_stm32f103.uvprojx
+Project File Date:  04/24/2024
 
 <h2>Output:</h2>
 *** Using Compiler 'V6.16', folder: 'C:\Keil_v5\ARM\ARMCLANG\Bin'
-Rebuild target 'Target 1'
+Rebuild target 'pcb_v2'
 compiling rom57.c...
-compiling state57.c...
-compiling utils57.c...
-compiling usart_utilities.c...
-compiling mux57.c...
 compiling main.c...
 compiling ti57.c...
+compiling state57.c...
+compiling usart_utilities.c...
+compiling UNIO.c...
+compiling mux57.c...
 compiling key57.c...
-compiling psave.c...
+compiling rom55.c...
+compiling addon57.c...
 compiling misc.c...
-compiling uni_eeprom.c...
 compiling stm32f10x_gpio.c...
-assembling startup_stm32f10x_md.s...
 compiling stm32f10x_rcc.c...
-compiling stm32f10x_usart.c...
+compiling stm32f10x_adc.c...
+assembling startup_stm32f10x_md.s...
 compiling system_stm32f10x.c...
+compiling stm32f10x_spi.c...
+compiling stm32f10x_usart.c...
 compiling stm32f10x_tim.c...
 linking...
-Program Size: Code=5204 RO-data=544 RW-data=4100 ZI-data=1652  
+Program Size: Code=9692 RO-data=872 RW-data=4100 ZI-data=1676  
 ".\Objects\ti57_stm32f103.axf" - 0 Error(s), 0 Warning(s).
 
 <h2>Software Packages used:</h2>
@@ -61,15 +63,17 @@ Package Vendor: Keil
                 Keil.STM32F1xx_DFP.2.4.0
                 STMicroelectronics STM32F1 Series Device Support, Drivers and Examples
    * Component: Startup Version: 1.0.0
+   * Component: ADC Version: 3.6.0
    * Component: Framework Version: 3.6.0
    * Component: GPIO Version: 3.6.0
    * Component: RCC Version: 3.6.0
+   * Component: SPI Version: 3.6.0
    * Component: TIM Version: 3.6.0
    * Component: USART Version: 3.6.0
 
 <h2>Collection of Component include folders:</h2>
   .\RTE\Device\STM32F103TB
-  .\RTE\_Target_1
+  .\RTE\_pcb_v2
   C:\Users\lemenset\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include
   C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\Include
   C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc
@@ -79,29 +83,37 @@ Package Vendor: Keil
    * Component: ARM::CMSIS:CORE:5.5.0
 
    * Component: Keil::Device:Startup:1.0.0
-      Source file:   Device\Source\system_stm32f10x.c
-      Source file:   Device\Source\ARM\STM32F1xx_OPT.s
       Include file:  RTE_Driver\Config\RTE_Device.h
       Source file:   Device\Source\ARM\startup_stm32f10x_md.s
+      Source file:   Device\Source\system_stm32f10x.c
+      Source file:   Device\Source\ARM\STM32F1xx_OPT.s
+
+   * Component: Keil::Device:StdPeriph Drivers:ADC:3.6.0
+      Include file:  Device\StdPeriph_Driver\inc\stm32f10x_adc.h
+      Source file:   Device\StdPeriph_Driver\src\stm32f10x_adc.c
 
    * Component: Keil::Device:StdPeriph Drivers:Framework:3.6.0
       Source file:   Device\StdPeriph_Driver\src\misc.c
-      Source file:   Device\StdPeriph_Driver\templates\stm32f10x_conf.h
       Include file:  Device\StdPeriph_Driver\inc\misc.h
-      Source file:   Device\StdPeriph_Driver\templates\stm32f10x_it.c
       Include file:  Device\StdPeriph_Driver\templates\stm32f10x_it.h
+      Source file:   Device\StdPeriph_Driver\templates\stm32f10x_it.c
+      Source file:   Device\StdPeriph_Driver\templates\stm32f10x_conf.h
 
    * Component: Keil::Device:StdPeriph Drivers:GPIO:3.6.0
       Include file:  Device\StdPeriph_Driver\inc\stm32f10x_gpio.h
       Source file:   Device\StdPeriph_Driver\src\stm32f10x_gpio.c
 
    * Component: Keil::Device:StdPeriph Drivers:RCC:3.6.0
-      Source file:   Device\StdPeriph_Driver\src\stm32f10x_rcc.c
       Include file:  Device\StdPeriph_Driver\inc\stm32f10x_rcc.h
+      Source file:   Device\StdPeriph_Driver\src\stm32f10x_rcc.c
+
+   * Component: Keil::Device:StdPeriph Drivers:SPI:3.6.0
+      Include file:  Device\StdPeriph_Driver\inc\stm32f10x_spi.h
+      Source file:   Device\StdPeriph_Driver\src\stm32f10x_spi.c
 
    * Component: Keil::Device:StdPeriph Drivers:TIM:3.6.0
-      Include file:  Device\StdPeriph_Driver\inc\stm32f10x_tim.h
       Source file:   Device\StdPeriph_Driver\src\stm32f10x_tim.c
+      Include file:  Device\StdPeriph_Driver\inc\stm32f10x_tim.h
 
    * Component: Keil::Device:StdPeriph Drivers:USART:3.6.0
       Source file:   Device\StdPeriph_Driver\src\stm32f10x_usart.c

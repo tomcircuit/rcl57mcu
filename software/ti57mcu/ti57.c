@@ -1,7 +1,9 @@
 #include "ti57.h"
 #include <string.h>
 #include "rom57.h"
+#include "rom55.h"
 #include "utils57.h"
+#include "rcl57mcu.h"
 
 /** A 13-bit opcode. */
 typedef unsigned short ti57_opcode_t;
@@ -359,8 +361,13 @@ void ti57_init(ti57_t *ti57)
 
 int ti57_next(ti57_t *ti57)
 {
+#ifdef TI55_ROM
     ti57_opcode_t opcode = ROM57[ti57->pc];
-
+#endif
+#ifdef TI57_ROM
+		ti57_opcode_t opcode = ROM55[ti57->pc];
+#endif
+	
 		ti57->display_update = false;
     ti57->pc += 1;
 

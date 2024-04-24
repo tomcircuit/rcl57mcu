@@ -1,67 +1,70 @@
+/* Copyright (C) 2024 by Tom LeMense <https:github.com/tomcircuit>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
+
 #include "mux57.h"
 #include "stm32f10x.h"
 #include "rcl57mcu.h"
+#include "usart_utilities.h"
 
-/* Multiplex LED and keyboard support for RCL-57 retrofit PCB V2
- * March 2024, Tom LeMense
- *
- *       --A--
- *      |     |
- *      F     B
- *      |     |
- *       --G--
- *      |     |
- *      E     C
- *      |     |
- *       --D--  [P]
- *
- * SEG # --  0   1   2   3   4   5   6   7
- * LED   --  E   F   B   G   C   A   D   DP
- *
- * digit 1 (rightmost) cannot illuminate DP
- * digit 12 (leftmost) cannot illuminate D
- *
- * KEYBOARD MAPPING
- *
- *            K     K     K     K     K
- *            1     2     3     4     5
- *
- *   SEG E   2ND   INV   LNX   CE    CLR
- *       0    11    12    13    14    15  <--- scancode
- *
- *   SEG F   LRN   X/T   X^2   vX    1/X
- *       1    21    22    23    24    25
- *
- *   SEG B   SST   STO   RCL   SUM   Y^X
- *       2    31    32    33    34    35
- *
- *   SEG G   BST   EE     (     )     /
- *       3    41    42    43    44    45
- *
- *   SEG C   GTO    7     8     9     X
- *       4    51    52    53    54    55
- *
- *   SEG A   SBR    4     5     6     -
- *       5    61    62    63    64    65
- *
- *   SEG D   RST    1     2     3     +
- *       6    71    72    73    74    75
- *
- *   SEG P   R/S    0     .    +/-    =
- *       7    81    82    83    84    85
- *
- */
+/* Multiplex LED and keyboard support for RCL-57 retrofit PCB V2 */
+/* https://hackaday.io/project/194963 */
 
 /* Private functions */
 
-/** send a 17-bit serial word to TLC5929; bit 17 is in r,  bits 16-1 are in d */
-void hw_digit_driver_send_word(unsigned char r, unsigned int d);
+/* send a 17-bit serial word to TLC5929; bit 17 is in r,  bits 16-1 are in d */
+void hw_digit_driver_send_word(uint8_t r, uint16_t d);
+
+/* raw keyboard K1-K5 data for each row */
+static uint8_t raw_keyboard_inputs[8];
+
+/* determine key scancode from K1-K5 inputs and specified segment */
+uint8_t hw_read_keyboard_row(uint8_t seg);
+
+/* determine key scancode from K1-K5 ADC results and specified segment */
+uint8_t hw_read_keyboard_adc_row(uint8_t seg);
+
+/* return the "raw" K1-K5 key column inputs obtained during hw_display_cycle */
+uint8_t hw_raw_keyboard_row(uint8_t s);
 
 /* Private data */
 
-/** map of segments required for each of the LED characters */
+/* map of segments required for each of the LED characters */
+
+#define SEGMENT_A (5)
+#define SEGMENT_B (2)
+#define SEGMENT_C (4)
+#define SEGMENT_D (6)
+#define SEGMENT_E (0)
+#define SEGMENT_F (1)
+#define SEGMENT_G (3)
+#define SEGMENT_P (7)
+
+#define DISPLAY_MASK_SHOW   (0x0)
+#define DISPLAY_MASK_BLANK  (0x8)
+#define DISPLAY_MASK_MINUS  (0x1)
+#define DISPLAY_MASK_POINT  (0x2)
+
+
 /*  Segment weighting follows TMC1500 (E,F,B,G,C,A,D,P} */
-const char SEGMENT_MAP[32][8] =
+const int8_t SEGMENT_MAP[32][8] =
 {
     /*     E  F  B  G  C  A  D  P   */
     /*0*/ {1, 1, 1, 0, 1, 1, 1, 0}, //  0 A-B-C-D-E-F
@@ -93,7 +96,7 @@ const char SEGMENT_MAP[32][8] =
     /*U*/ {1, 1, 1, 0, 1, 0, 1, 0}, // 25 B-C-D-E-F-G
     /*Y*/ {0, 1, 1, 1, 1, 0, 1, 0}, // 26 B-C-D-F-G
     /*"*/ {0, 1, 1, 0, 0, 0, 0, 0}, // 27 B-F
-    /*^*/ {0, 1, 1, 0, 0, 1, 0, 0}, // 28 A-B-F
+    /*]*/ {0, 0, 1, 0, 1, 1, 1, 0}, // 28 A-B-C-D
     /*.*/ {0, 0, 0, 0, 0, 0, 0, 1}, // 29 DP
     /*-*/ {0, 0, 0, 1, 0, 0, 0, 0}, // 30 G
     /* */ {0, 0, 0, 0, 0, 0, 0, 0}  // 31 <none>
@@ -103,27 +106,148 @@ const char SEGMENT_MAP[32][8] =
 
 ////////////////////////
 
-/** return 0/1 if the specified segment s is to be illuminated in character code c */
-char mux57_is_segment(unsigned char c, unsigned char s)
+/* attempt to convert ASCII chracter into a display character code */
+uint8_t mux57_char_code(uint8_t c)
 {
-    if (c > 31)     // if not a defined character, consider it blank
-        c = 31;
+    uint8_t code;
+    switch (toupper(c))
+    {
+    case '0':    case '1':    case '2':    case '3':    case '4':
+    case '5':    case '6':    case '7':    case '8':    case '9':
+        code = c - '0'; break;
+    case 'A':    case 'B':    case 'C':    case 'D':    case 'E':
+    case 'F':    case 'G':    case 'H':
+        code = c - 'A' + 10; break;
+    case 'J':
+        code = 18; break;
+    case 'L':
+        code = 19; break;
+    case 'N':    case 'O':    case 'P':
+        code = c - 'N' + 20; break;
+    case 'R':
+        code = 23; break;
+    case 'T':    case 'U':
+        code = c - 'T' + 24; break;
+    case 'Y':
+        code = 26; break;
+    case '"':
+        code = 27; break;
+    case ']':
+        code = 28; break;
+    case '.':
+        code = 29; break;
+    case '-':
+        code = 30; break;
+    default:
+        code = CHAR_CODE_BLANK;
+    }
+    return code;
+}
+
+/* convert null-terminated string to arrays of display digit and mask codes */
+void mux57_paint_digits(const uint8_t* ins, display_data_t* digits, display_data_t* mask)
+{
+    int32_t i, j, len;
+
+    /* determine length of input string, up to 12 characters */
+    len = 0;
+    while ((ins[len] != '\0') && (len < 12))
+    {
+        len++;
+    }
+
+    /* translate input string right-to-left starting from last character */
+    i = 0;  // initialize digit index to zero (rightmost digit)
+    for (j = len; j > 0; --j)
+    {
+        (*mask)[i] = DISPLAY_MASK_SHOW;    // make digit visible
+        (*digits)[i++] = mux57_char_code(ins[j - 1]); // converted digit code
+    }
+
+    /* mask leftmost digits, if needed, to make 12 digits total */
+    while (i < 12)
+    {
+        (*mask)[i++] = DISPLAY_MASK_BLANK;       // do not display this digit
+    }
+}
+
+/* convert array of digit and mask codes to null-terminated string */
+uint8_t* mux57_display_to_str(display_data_t* digits, display_data_t* mask)
+{
+    const uint8_t DIGITS[] = "0123456789AbCdEFGHJLnoPrtUY'].- ";
+    static uint8_t str[25];
+    int16_t k = 0;
+
+    // Go through the 12 digits.
+    for (uint8_t i = 11; i >= 0; i--)
+    {
+        // Compute the actual character based on the digit and the mask information
+        int8_t c;
+        if ((*mask)[i] & 0x8)
+        {
+            c = ' ';
+        }
+        else if ((*mask)[i] & 0x1)
+        {
+            c = '-';
+        }
+        else
+        {
+            c = DIGITS[(*digits)[i]];
+        }
+
+        // Add character to the string.
+        str[k++] = c;
+
+        // Add the decimal point if necessary.
+        if ((*mask)[i] & 0x2)
+        {
+            str[k++] = '.';
+        }
+    }
+    str[k] = 0;
+
+    return str;
+}
+
+
+/* return 0/1 if the specified segment s is to be illuminated in character code c */
+uint8_t mux57_is_segment(uint8_t c, uint8_t s)
+{
+    if (c > CHAR_CODE_BLANK)     // if not a defined character, consider it blank
+        c = CHAR_CODE_BLANK;
     return SEGMENT_MAP[c][s & 0x7];
 }
 
-//** parse dA (digits) and dB (mask) contents to determine which digits have segment s illuminated */
-unsigned int mux57_which_digits(ti57_reg_t* digits, ti57_reg_t* mask, unsigned char s)
+/* parse dA (digits) and dB (mask) to determine which digits have segment s illuminated
+ *
+ * The return value contains '1' in the bit positions corresponding to the
+ * digits (e.g. digit 1 is bit 0, digit 2 is bit 1, etc) that must be driven.
+ *
+ * For example:
+ *   ti57->dA = 0000000000123000
+ *   ti57->dB = 9999999999000999
+ *   s = 0 (segment a)
+ *
+ *   return value is 0b0000000000011000 --> digits 4 and 5 have segment 'a' active
+ *
+ *                         111000000000
+ *                         210987654321 --> digit # (there are only 12 digits!)
+ *
+ * This really isn't useful to rcl57 mcu, merely an example of how to parse the dA and
+ * dB registers */
+uint16_t mux57_which_digits(display_data_t* digits, display_data_t* mask, uint8_t s)
 {
-    unsigned int d = 0;
+    uint16_t d = 0;
 
     // when segment requested is a-g
     if (s < 7)
     {
         // Go through the 12 digits in descending order
-        for (int i = 11; i >= 0; i--)
+        for (uint8_t i = 11; i >= 0; i--)
         {
             char c;
-            // Shift the existing d value left one bit
+            // Make room for new bit in lsb of d
             d = d << 1;
             // Assume the character is only based on the digit information
             c = ((*digits)[i] & 0xf); /*0-f*/
@@ -141,7 +265,7 @@ unsigned int mux57_which_digits(ti57_reg_t* digits, ti57_reg_t* mask, unsigned c
         }
     }
     // when segment requested is p (decimal point)
-    else if (s == 7)
+    else if (s == SEGMENT_P)
     {
         // Go through the 12 digits in descending order
         for (int i = 11; i >= 0; i--)
@@ -155,114 +279,145 @@ unsigned int mux57_which_digits(ti57_reg_t* digits, ti57_reg_t* mask, unsigned c
     }
     return d;
 }
-
-/* digit cathode connections to each TLC5929 output
-   OUT0  -> d12, OUT1  -> d11, OUT2  -> d10, OUT3  -> d9
-   OUT4  -> d8 , OUT5  -> d7 , OUT6  -> d6,  OUT7  -> d5
-   OUT8  -> d4 , OUT9  -> d3 , OUT10 -> d2,  OUT11 -> d1
-   OUT12...OUT15 should always be off (to enable PS mode)
-
-   outputs are shifted into TLC5929 15...0 order.
-   Neither DP of D1 nor D of D12 may EVER be activated
-     due to hardware limitations of the TI-57 PCB */
-
-/** parse dA (digits) and dB (mask) contents to determine which TLC5929 outputs should be active for segment s */
-unsigned int mux57_which_outputs(ti57_reg_t* digits, ti57_reg_t* mask, unsigned char s)
+/* parse dA (digits) and dB (mask) contents to determine TLC5929 output word for segment s
+ *
+ * The return value contains '1' in the bit positions corresponding to the
+ * outputs (e.g. LED1 is bit 11, LED2 is bit 10, etc) that must be driven.
+ *
+ * TLC5929 Output    :  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11
+ * LED Display Digit : 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1
+ *
+ * TLC5929 outputs 12-15 are not used and are typically left off (0 in output register)
+ *
+ * Had I the space for more components on the PCB, I would have used one or more
+ * of the unused outputs as a means to dump the charge on the PMOS segment drivers
+ * at the end of the display cycle. This would take at least two dual diode packages
+ * to implement, however. For anyone making their own circuit around this design,
+ * I do recommend including this - it would allow simplyfing the hw_display_update()
+ * function significantly.
+ *
+ */
+uint16_t mux57_which_outputs(display_data_t* digits, display_data_t* mask, uint8_t s)
 {
-    unsigned int d = 0;
+    uint16_t d = 0;
 
     // when segment requested is a-g
-    if (s < 7)
+    if (s != SEGMENT_P)
     {
-        // Go through the 12 digits in ascending order
-        for (int i = 0; i < 12; i++)
+        // Go through the 12 digits in ascending order (OUT0 = d12)
+        for (uint8_t i = 0; i < 12; i++)
         {
             char c;
-            // Shift the exsting d value right one bit
-            d = d >> 1;
+
+            // Make room for new bit in lsb of d
+            d = d << 1;
+
             // Assume the character is only based on the digit information
-            c = ((*digits)[i] & 0xf); /*0-f*/
+            c = (*digits)[i];
+            if (c > CHAR_CODE_BLANK)
+                c = CHAR_CODE_BLANK; /* blank */
+
             // Replace the character if necessary based on the mask information
-            if ((*mask)[i] & 0x8)
+            if ((*mask)[i] & DISPLAY_MASK_BLANK)
             {
                 c = CHAR_CODE_BLANK; /* blank */
             }
-            else if ((*mask)[i] & 0x1)
+            else if ((*mask)[i] & DISPLAY_MASK_MINUS)
             {
                 c = CHAR_CODE_MINUS; /* minus sign */
             }
-            // if digit is active, set the msb
+            // if digit is active, set the lsb
             if (SEGMENT_MAP[c][s])
-                d = d | (1 << 15);
+                d |= 1 ;
         }
     }
     // when segment requested is p (decimal point)
-    else if (s == 7)
+    else if (s == SEGMENT_P)
     {
-        // Go through the 12 digits in descending order
+        // Go through the 12 digits in ascending order (OUT0 = d12)
         for (int i = 0; i < 12; i++)
         {
-            // Shift the existing d value right one bit
-            d = d >> 1;
+            // Make room for new bit in lsb of d
+            d = d << 1;
+
             // indicate if this digit has decimal point active
-            if ((*mask)[i] & 0x2)
-                d = d | (1 << 15);
+            if ((*mask)[i] & DISPLAY_MASK_POINT)
+                d |= 1 ;
         }
     }
-
-    /* Segment DP (7) of digit #1 can NEVER be activated */
-    if (s == 7)
-        d = d & 0xffe0;
-    /* Segment D (6) of digit #12 can NEVER be activated */
-    else if (s == 6)
-        d = d & 0x7ff0;
-    /* always clear 4 lsb of d (unused driver outputs) */
-    else
-        d = d & 0xfff0;
 
     return d;
 }
 
-/**perform a 6.4ms long display update cycle, using DIGITS and MASK */
+/* perform a 6.4ms long display update cycle, using DIGITS and MASK */
 /* return value is a scancode (or 0) collected during display scanning */
-unsigned char hw_display_cycle(ti57_reg_t* digits, ti57_reg_t* mask)
+uint8_t hw_display_cycle(display_data_t* digits, display_data_t* mask)
 {
-    unsigned char segment = 0;  // segment counter 0-7
-    unsigned int d_outputs = 0; // digit driver output data
-    unsigned int k_inputs = 0;  // keyboard column inputs
-    unsigned char scancode = 0; // keyboard scancode
+    uint8_t segment = 0;  // segment counter 0-7
+    uint16_t d_outputs = 0; // digit driver output data
+    uint8_t scancode = 0; // keyboard scancode
 
-    /* preload the TLC5929 SR with SEGMENT E (#0) digit outputs */
+    /* preload the TLC5929 SR with segment #0 (SEGMENT E) digit outputs */
     /* determine which digits have segment E illuminated */
-    d_outputs = mux57_which_outputs(*digits, *mask, 0);
+    d_outputs = mux57_which_outputs(*digits, *mask, SEGMENT_E);
 
     /* send the pattern to the TLC5929 digit driver */
     hw_digit_driver_load(d_outputs);
 
+    /* make sure the 12th digit 'direct drive' output is floating */
+    DIRECT_D12_OFF;
+
     /* Wait for SysTick to start segment scan sequence */
-    __WFI();
+    //__WFI();
 
     /* loop through the 8 segments, 800us per segment */
     for (segment = 0; segment < 8; segment++)
     {
-
         /* disable all segment drive outputs */
         hw_segment_disable_all();
 
         /* drive previously loaded digit pattern to TLC5929 outputs */
         hw_digit_driver_update();
 
-        /* enable the appropriate segment drive output */
-        hw_segment_enable(segment);
+        /* handle segment activation depending on if some/no digits are to be active */
+        if (d_outputs != 0)
+        {
+            /* case 1: this segement is active in at least one digit (1's in d_outputs) */
+            /* enable the appropriate segment drive output */
+            hw_segment_enable(segment);
 
-        /* at this point in time, one segement is active in all of the
-             digit(s) that need it */
+            /* give time for the LED segment in selected digit(s) to illuminate */
+            for (int u = SEGMENT_ACTIVE_TICKS; u > 0; u--)
+                __WFI();
 
-        /* wait for SEGMENT_TICKS-1 with segment and digit(s) driven.
-             During the last tick the next segment's digit pattern
-             will be shifted out (but not yet loaded).*/
-        for (int u = SEGMENT_TICKS - 1; u > 0; u--)
+            /* read this segment's keyboard scancode. Save it if no scancode already held */
+            if (scancode == 0)
+                scancode = hw_read_keyboard_adc_row(segment);
+
+            /* turn of all segment outputs (takes a while for PMOS to turn off) */
+            hw_segment_disable_all();
+        }
+        else
+        {
+            /* case 2: no digits need this segment activated - so only read the keypad row */
+            /* enable the appropriate segment drive output */
+            hw_segment_enable(segment);
+
+            /* wait for 2 ticks (100us) with the segment driver active */
             __WFI();
+            __WFI();
+
+            /* read this segment's keyboard scancode. Save it if no scancode already held */
+            if (scancode == 0)
+                scancode = hw_read_keyboard_adc_row(segment);
+
+            /* turn of all segment outputs (takes a while for PMOS to turn off) */
+            hw_segment_disable_all();
+
+            /* wait for all but 2 of SEGMENT ACTIVE TICKS with segment deactivated */
+            for (int u = SEGMENT_ACTIVE_TICKS - 2; u > 0; u--)
+                __WFI();
+        }
 
         /* determine which digit pattern to preload for next segment */
         /* or all off (0's) in the case of all segments completed */
@@ -271,18 +426,15 @@ unsigned char hw_display_cycle(ti57_reg_t* digits, ti57_reg_t* mask)
         else
             d_outputs = 0;
 
-        /* send the pattern to the TLC5929 digit driver */
+        /* load the digit pattern into the TLC5929 for next segment period*/
         hw_digit_driver_load(d_outputs);
 
-        /* read this segment's keyboard scancode. Save it if no scancode already held */
-        if (scancode == 0)
-            scancode = hw_read_keyboard_row(segment);
-
-        /* wait for final tick of this segment period */
-        __WFI();
+        /* wait for remainder of segment interval */
+        for (int u = SEGMENT_INACTIVE_TICKS; u > 0; u--)
+            __WFI();
     }
 
-    /* disable all segment drive outputs */
+    /* disable all segment drive outputs - just in case */
     hw_segment_disable_all();
 
     /* update the TLC5929 to all outputs off (enter power-save mode) */
@@ -295,14 +447,12 @@ unsigned char hw_display_cycle(ti57_reg_t* digits, ti57_reg_t* mask)
     return scancode;
 }
 
-
-/** display a single character at digit 12 in a 6.4ms cycle */
+/* display a single character at digit 12 in a 6.4ms cycle */
 /* return value is a scancode (or 0) collected during display scanning */
-unsigned char hw_display_char_d12(unsigned char c)
+uint8_t hw_display_char_d12(uint8_t c)
 {
-    unsigned char segment = 0;  // segment counter 0-7
-    unsigned char digit_en = 0; // digit driver enable
-    unsigned char scancode = 0; // keyboard scancode
+    uint8_t segment = 0;  // segment counter 0-7
+    uint8_t scancode = 0; // keyboard scancode
 
     /* Wait for SysTick to start segment scan sequence */
     __WFI();
@@ -313,31 +463,74 @@ unsigned char hw_display_char_d12(unsigned char c)
         /* disable all segment drive outputs */
         hw_segment_disable_all();
 
-        /* turn on DIG12 if segment is needed for this character */
-        if (mux57_is_segment(c, segment))
-            GPIOB->BRR = GPIO_Pin_4;    // drive D12DIR low
-        else
-            GPIOB->BSRR = GPIO_Pin_4;   // float D12DIR high
+        /* turn off D12 digit driver */
+        DIRECT_D12_OFF;
 
         /* enable the appropriate segment drive output */
         hw_segment_enable(segment);
 
-        /* wait for SEGMENT_TICKS with segment and digit driven. */
-        for (int u = SEGMENT_TICKS; u > 0; u--)
+        /* handle segment activation depending on if some/no digits are to be active */
+        /* case 1: digit 12 needs this segement illumintaed - drive for 700us */
+        if (mux57_is_segment(c, segment))
+        {
+            /* turn on DIG12 if segment is needed for this character */
+            DIRECT_D12_ON;    // drive D12DIR low
+
+            /* allow the LED segment in selected digit(s) to illuminate */
+            for (uint8_t u = SEGMENT_ACTIVE_TICKS; u > 0; u--)
+                __WFI();
+
+            /* read this segment's keyboard scancode. Save it if no scancode already held */
+            if (scancode == 0)
+                scancode = hw_read_keyboard_adc_row(segment);
+
+            /* turn of all segment outputs (takes a while for PMOS to turn off) */
+            hw_segment_disable_all();
+        }
+        else
+            /* case 2: segment not illuminuated in digit 12 - drive for 100us only (for key read)*/
+        {
+            /* wait for 2 ticks (100us) with the segment driver active */
+            __WFI();
             __WFI();
 
-        /* read this segment's keyboard scancode. Save it if no scancode already held */
-        if (scancode == 0)
-            scancode = hw_read_keyboard_row(segment);
+            /* read this segment's keyboard scancode. Save it if no scancode already held */
+            if (scancode == 0)
+                scancode = hw_read_keyboard_adc_row(segment);
+
+            /* turn of all segment outputs (takes a while for PMOS to turn off) */
+            hw_segment_disable_all();
+
+            /* wait out the remainder of SEGMENT ACTIVE TICKS with segment deactivated */
+            for (uint8_t u = SEGMENT_ACTIVE_TICKS - 2; u > 0; u--)
+                __WFI();
+
+        }
     }
 
     /* disable all segment drive outputs */
     hw_segment_disable_all();
 
     /* turn D12DIR output back off (floating high) */
-    GPIOB->BSRR = GPIO_Pin_4;
+    DIRECT_D12_OFF;
 
     return scancode;
+}
+
+/* display a string to LED for n-display cycles */
+void mux57_splash(const uint8_t* ins, uint32_t n)
+{
+    display_data_t codes, masks;
+
+    /* paint the string to the codes and masks arrays */
+    mux57_paint_digits(ins, codes, masks);
+
+    for (uint32_t i = n; i > 0; --i)
+    {
+        DEBUG_TICK_ON;
+        hw_display_cycle(codes, masks);
+        DEBUG_TICK_OFF;
+    }
 }
 
 
@@ -363,7 +556,7 @@ void hw_segment_enable_all(void)
  *   SEG # --  0   1   2   3   4   5   6   7
  *   LED   --  E   F   B   G   C   A   D   DP
   !! MCU GPIO assignment dependent - PCB V2 !! */
-void hw_segment_enable(unsigned char s)
+void hw_segment_enable(uint8_t s)
 {
     switch (s)
     {
@@ -394,15 +587,15 @@ void hw_segment_enable(unsigned char s)
     }
 }
 
+/*******************************************/
 /* TLC5929 Digit Driver specific functions */
+/*******************************************/
 
-/* reset the TLC5929 digit driver LATCH, CLOCK, and DATA signals */
+/* reset the TLC5929 digit driver LATCH signal */
 void hw_digit_driver_reset(void)
 {
     /* Negate LATCH */
     GPIOA->BRR = GPIO_Pin_15;
-    /* Negate SCLK and SDATA */
-    GPIOB->BRR = GPIO_Pin_3 | GPIO_Pin_5;
 }
 
 /* Initialize the TLC5929 digit driver IC by turning all outputs off,
@@ -415,66 +608,41 @@ void hw_digit_driver_initialize(void)
     hw_digit_driver_update(); // latch in the control word
 }
 
-/* send output data to the TLC5929 */
-void hw_digit_driver_send_word(unsigned char r, unsigned int d)
+/* Set the display dimming based upon 0-15 value, using a lookup
+ * table to attempt to make the brightness steps more linear */
+void hw_digit_driver_intensity(uint8_t i)
 {
-    /* Negate LATCH */
-    GPIOA->BRR = GPIO_Pin_15;
-    /* Negate SCLK */
-    GPIOB->BRR = GPIO_Pin_3;
-    /* delay for some LATCH - SCLK setup time */
-    __NOP();
-    __NOP();
-    __NOP();
-
-    /* clock in bit 16 based upon value in argument 'r' */
-    if (r & 1u)
-        /* LSB of r is 1 --> assert SDAT */
-        GPIOB->BSRR = GPIO_Pin_5;
-    else
-        /* LSB of r is 0 --> negate SDAT */
-        GPIOB->BRR = GPIO_Pin_5;
-
-    /* delay for data setup then assert SCLK */
-    __NOP();
-    __NOP();
-    GPIOB->BSRR = GPIO_Pin_3;
-
-    /* delay for data hold then negate SCLK */
-    __NOP();
-    __NOP();
-    GPIOB->BRR = GPIO_Pin_3;
-
-    /* clock in bits 15-0 based upon value in argument 'd' */
-    for (int i = 16; i > 0; i--)
+    unsigned const char DIMMING[16] =
     {
-        if (d & 0x8000u)
-            /* MSB of d is 1 --> assert SDAT */
-            GPIOB->BSRR = GPIO_Pin_5;
-        else
-            /* MSB of d is 0 --> negate SDAT */
-            GPIOB->BRR = GPIO_Pin_5;
+        5,    9,  12,  18,  23,  31,  38,  44,
+        51,  58,  67,  76,  86,  96, 109, 127
+    };
 
-        /* delay for data setup then assert SCLK */
-        __NOP();
-        __NOP();
-        GPIOB->BSRR = GPIO_Pin_3;
-
-        /* delay for data hold then negate SCLK */
-        __NOP();
-        __NOP();
-        GPIOB->BRR = GPIO_Pin_3;
-
-        /* shift d left by 1 to expose next bit */
-        d = d << 1;
-    }
-
-    /* always leave with SDATA and SCLK negated */
-    GPIOB->BRR = GPIO_Pin_5 | GPIO_Pin_3;
+    hw_digit_driver_send_word(1, (1 << 15) + DIMMING[i & 0x0f]);
+    hw_digit_driver_update();
 }
 
+/* send output data to the TLC5929 */
+void hw_digit_driver_send_word(uint8_t r, uint16_t d)
+{
+    /* Enable the SPI interface */
+    SPI_Cmd(SPI1, ENABLE);
 
-/** Update the TLC5929 driver outputs by toggling the LATCH signal */
+    /* send bits 23-16 -- only bit 16 is held by TLC5929 */
+    SPI_I2S_SendData(SPI1, r);
+    while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_BSY));
+    /* send bits 15-8 */
+    SPI_I2S_SendData(SPI1, (d >> 8) & 0xff);
+    while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_BSY));
+    /* send bits 7-0 */
+    SPI_I2S_SendData(SPI1, (d & 0xff));
+    while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_BSY));
+
+    /* Disable the SPI interface */
+    SPI_Cmd(SPI1, ENABLE);
+}
+
+/* Update the TLC5929 driver outputs by toggling the LATCH signal */
 void hw_digit_driver_update(void)
 {
     /* Assert LATCH */
@@ -485,53 +653,164 @@ void hw_digit_driver_update(void)
     GPIOA->BRR = GPIO_Pin_15;
 }
 
-/* Shift a serial word into the TLC5929 output driver shift register */
-void hw_digit_driver_load(unsigned int d)
+/* Shift a serial word into the TLC5929 output driver register */
+void hw_digit_driver_load(uint16_t d)
 {
     hw_digit_driver_send_word(0, d);
 }
 
-/* encode the K1-K5 key column inputs and active segment into a scancode */
-unsigned char hw_read_keyboard_row(unsigned char seg)
+/*******************************/
+/* Keyboard specific functions */
+/*******************************/
+
+#define COLUMN_ADC_THRESHOLD (3000U)
+#define ADC_EOC_TIMEOUT (1000U)
+#define ADC_ERROR_CODE (0xFF)
+
+/* encode the K1-K5 key column ADC results and active segment into a scancode */
+uint8_t hw_read_keyboard_adc_row(uint8_t seg)
 {
-    unsigned char code = 0;
-    unsigned char row;
-    unsigned char col;
-    unsigned int kin;
+    uint8_t code = 0;
+    uint8_t kb_row = 0;
+    uint8_t kb_col = 0;
+    uint16_t k_result;
+    uint16_t adc_timeout;
+
+    /* Enable the ADC */
+    ADC_Cmd(ADC1, ENABLE);
+
+    /* clear "raw data" in this segment's row */
+    raw_keyboard_inputs[seg & 0x7] = 0;
+
+    /* Start ADC "Regular Conversion" on CH0  */
+    ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+    /* Start ADC "Injected Conversion Sequence" on CH1-4  */
+    ADC_SoftwareStartInjectedConvCmd(ADC1, ENABLE);
+
+    /* wait for both normal and injected conversions to complete */
+    for (adc_timeout = ADC_EOC_TIMEOUT; adc_timeout > 0; --adc_timeout)
+    {
+        if ((ADC1->SR & ADC_SR_EOC) && (ADC1->SR & ADC_SR_JEOC))
+            break;
+    }
+    /* if conversion did not complete, return an error code */
+    if (adc_timeout == 0)
+        return ADC_ERROR_CODE;
+
+    /* Clear the end-of-conversion flags */
+    ADC_ClearFlag(ADC1, ADC_FLAG_EOC);
+    ADC_ClearFlag(ADC1, ADC_FLAG_JEOC);
+
+    /* iterate through results for columns 5-1 */
+    for (uint8_t k = 5; k > 0; --k)
+    {
+        /* shift raw readings left to make room for new lsb */
+        raw_keyboard_inputs[seg & 0x7] = raw_keyboard_inputs[seg & 0x7] << 1;
+
+        /* retrieve correct ADC result for a given column */
+        switch (k)
+        {
+        case 1:
+            k_result = ADC1->DR;
+            break;      //ADC DR holds 'K1'
+        case 2:
+            k_result = ADC1->JDR1;
+            break;      //ADC JDR1 holds 'K2'
+        case 3:
+            k_result = ADC1->JDR2;
+            break;      //ADC JDR2 holds 'K3'
+        case 4:
+            k_result = ADC1->JDR3;
+            break;      //ADC JDR3 holds 'K4'
+        case 5:
+        default:
+            k_result = ADC1->JDR4;
+            break;      //ADC JDR1 holds 'K5'
+        }
+
+        /* if the ADC results exceeds a threshold, keyswitch in that column is closed */
+        if (k_result > COLUMN_ADC_THRESHOLD)
+        {
+            /* set bit for column in "raw reading" */
+            raw_keyboard_inputs[seg & 0x7] |= 1;
+            /* indicate column in which keyswitch is closed */
+            kb_col = k;
+            /* convert segment number (0-7) to row number (1-8) */
+            kb_row = (seg & 0x7) + 1;
+        }
+    }
+
+    /* Disable the ADC */
+    ADC_Cmd(ADC1, DISABLE);
+
+    /* code will be 0 (no key) or a key scancode (11..85) or an ADC error (FF) */
+    code = ((kb_row << 4) | kb_col);
+    return code;
+}
+
+
+/* encode the K1-K5 key column inputs and active segment into a scancode */
+uint8_t hw_read_keyboard_row(uint8_t s)
+{
+    uint8_t code = 0;
+    uint8_t kb_row;
+    uint8_t kb_col;
+    uint16_t k_inputs;
 
     /* read the K1-K5 switch inputs */
-    kin = (GPIO_ReadInputData(GPIOA) & 0x001f);
+    k_inputs = (GPIO_ReadInputData(GPIOA) & 0x001f);
 
     /* save to "raw data" array */
-    raw_keyboard_inputs[seg & 0x7] = kin;
+    raw_keyboard_inputs[s & 0x7] = k_inputs;
 
     /* convert segment number (0-7) to row number (1-8) */
-    row = (seg & 0x7) + 1;
+    kb_row = (s & 0x7) + 1;
 
-    /* determine column number from kin bits */
-    if (kin & 1)
-        col = 1;
-    else if (kin & 2)
-        col = 2;
-    else if (kin & 4)
-        col = 3;
-    else if (kin & 8)
-        col = 4;
-    else if (kin & 16)
-        col = 5;
+    /* determine column number from k_inputs bits */
+    if (k_inputs & 1)
+        kb_col = 1;
+    else if (k_inputs & 2)
+        kb_col = 2;
+    else if (k_inputs & 4)
+        kb_col = 3;
+    else if (k_inputs & 8)
+        kb_col = 4;
+    else if (k_inputs & 16)
+        kb_col = 5;
     else
     {
-        col = 0;
-        row = 0;
+        kb_col = 0;
+        kb_row = 0;
     }
 
     /* code will be either 0 or a key scancode (11..85) */
-    code = ((row << 4) | col);
+    code = ((kb_row << 4) | kb_col);
     return code;
 }
 
 /* return the K1-K5 key column inputs obtained through read_keyboard_row() */
-unsigned char hw_raw_keyboard_row(unsigned char s)
+uint8_t hw_raw_keyboard_row(uint8_t s)
 {
     return raw_keyboard_inputs[s & 0x7];
+}
+
+/* wait for a key to be released - assumes segment(s) already enabled */
+void hw_wait_for_key_release(uint32_t t)
+{
+    uint32_t count;
+    uint16_t k_inputs;
+
+    /* get an initial read of key inputs */
+    k_inputs = (GPIO_ReadInputData(GPIOA) & 0x001f);
+    count = t;
+
+    while ((k_inputs != 0) || (count > 0))
+    {
+        Delay(10000 / 50);
+        k_inputs = (GPIO_ReadInputData(GPIOA) & 0x001f);
+        if (k_inputs == 0)
+            count = count - 1;
+        else
+            count = t;
+    }
 }

@@ -1,6 +1,6 @@
 Dependencies for Project 'ti57_stm32f103', Target 'Target 1': (DO NOT MODIFY !)
 CompilerVersion: 6160000::V6.16::ARMCLANG
-F (.\main.c)(0x65F4BB76)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -w-I./RTE/Device/STM32F103TB-I./RTE/_Target_1-IC:/Users/lemenset/AppData/Local/Arm/Packs/ARM/CMSIS/5.8.0/CMSIS/Core/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/StdPeriph_Driver/inc-D__UVISION_VERSION="536" -D_RTE_ -DSTM32F10X_MD -D_RTE_-o ./objects/main.o -MD)
+F (.\main.c)(0x65F8B984)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -w-I./RTE/Device/STM32F103TB-I./RTE/_Target_1-IC:/Users/lemenset/AppData/Local/Arm/Packs/ARM/CMSIS/5.8.0/CMSIS/Core/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/StdPeriph_Driver/inc-D__UVISION_VERSION="536" -D_RTE_ -DSTM32F10X_MD -D_RTE_-o ./objects/main.o -MD)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\Include\stm32f10x.h)(0x61AE221E)
 I (RTE\_Target_1\RTE_Components.h)(0x65F45708)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include\core_cm3.h)(0x60D491A2)
@@ -21,9 +21,10 @@ I (C:\Keil_v5\ARM\ARMCLANG\include\stdbool.h)(0x6035B08A)
 I (key57.h)(0x65D7B2A5)
 I (op57.h)(0x64D81504)
 I (mux57.h)(0x65EF6FF8)
-I (rcl57mcu.h)(0x65F1FC1C)
+I (rcl57mcu.h)(0x65F4BF29)
 I (psave.h)(0x65F1F305)
-I (uni_eeprom.h)(0x65F494E7)
+I (unio.h)(0x65F8B999)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stddef.h)(0x6035B090)
 F (.\ti57.c)(0x65B42378)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -w-I./RTE/Device/STM32F103TB-I./RTE/_Target_1-IC:/Users/lemenset/AppData/Local/Arm/Packs/ARM/CMSIS/5.8.0/CMSIS/Core/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/StdPeriph_Driver/inc-D__UVISION_VERSION="536" -D_RTE_ -DSTM32F10X_MD -D_RTE_-o ./objects/ti57.o -MD)
 I (ti57.h)(0x65B3F997)
 I (state57.h)(0x65B417D3)
@@ -72,9 +73,9 @@ I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\Std
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_tim.h)(0x61AE221E)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_usart.h)(0x61AE221E)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\misc.h)(0x61AE221E)
-I (rcl57mcu.h)(0x65F1FC1C)
-F (.\usart_utilities.c)(0x65B95E32)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -w-I./RTE/Device/STM32F103TB-I./RTE/_Target_1-IC:/Users/lemenset/AppData/Local/Arm/Packs/ARM/CMSIS/5.8.0/CMSIS/Core/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/StdPeriph_Driver/inc-D__UVISION_VERSION="536" -D_RTE_ -DSTM32F10X_MD -D_RTE_-o ./objects/usart_utilities.o -MD)
-I (usart_utilities.h)(0x65B94FAC)
+I (rcl57mcu.h)(0x65F4BF29)
+F (.\usart_utilities.c)(0x65F8B99F)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -w-I./RTE/Device/STM32F103TB-I./RTE/_Target_1-IC:/Users/lemenset/AppData/Local/Arm/Packs/ARM/CMSIS/5.8.0/CMSIS/Core/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/StdPeriph_Driver/inc-D__UVISION_VERSION="536" -D_RTE_ -DSTM32F10X_MD -D_RTE_-o ./objects/usart_utilities.o -MD)
+I (usart_utilities.h)(0x65F8B9A5)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_usart.h)(0x61AE221E)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\Include\stm32f10x.h)(0x61AE221E)
 I (RTE\_Target_1\RTE_Components.h)(0x65F45708)
@@ -113,13 +114,16 @@ I (C:\Keil_v5\ARM\ARMCLANG\include\stdbool.h)(0x6035B08A)
 I (key57.h)(0x65D7B2A5)
 I (op57.h)(0x64D81504)
 I (mux57.h)(0x65EF6FF8)
-I (rcl57mcu.h)(0x65F1FC1C)
+I (rcl57mcu.h)(0x65F4BF29)
 I (psave.h)(0x65F1F305)
-F (.\uni_eeprom.c)(0x65F4BC9D)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -w-I./RTE/Device/STM32F103TB-I./RTE/_Target_1-IC:/Users/lemenset/AppData/Local/Arm/Packs/ARM/CMSIS/5.8.0/CMSIS/Core/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/StdPeriph_Driver/inc-D__UVISION_VERSION="536" -D_RTE_ -DSTM32F10X_MD -D_RTE_-o ./objects/uni_eeprom.o -MD)
+F (.\UNIO.c)(0x65F8B993)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -w-I./RTE/Device/STM32F103TB-I./RTE/_Target_1-IC:/Users/lemenset/AppData/Local/Arm/Packs/ARM/CMSIS/5.8.0/CMSIS/Core/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/StdPeriph_Driver/inc-D__UVISION_VERSION="536" -D_RTE_ -DSTM32F10X_MD -D_RTE_-o ./objects/unio.o -MD)
+I (UNIO.h)(0x65F8B999)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stddef.h)(0x6035B090)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdbool.h)(0x6035B08A)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x65EB5FB8)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\Include\stm32f10x.h)(0x61AE221E)
 I (RTE\_Target_1\RTE_Components.h)(0x65F45708)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include\core_cm3.h)(0x60D491A2)
-I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x65EB5FB8)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_version.h)(0x60D491A2)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_compiler.h)(0x60D491A2)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_armclang.h)(0x60D491A2)
@@ -130,7 +134,6 @@ I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\Std
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_tim.h)(0x61AE221E)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_usart.h)(0x61AE221E)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\misc.h)(0x61AE221E)
-I (uni_eeprom.h)(0x65F494E7)
 F (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\src\misc.c)(0x61AE221E)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -w-I./RTE/Device/STM32F103TB-I./RTE/_Target_1-IC:/Users/lemenset/AppData/Local/Arm/Packs/ARM/CMSIS/5.8.0/CMSIS/Core/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/StdPeriph_Driver/inc-D__UVISION_VERSION="536" -D_RTE_ -DSTM32F10X_MD -D_RTE_-o ./objects/misc.o -MD)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\misc.h)(0x61AE221E)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\Include\stm32f10x.h)(0x61AE221E)
@@ -176,6 +179,21 @@ I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\Std
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_tim.h)(0x61AE221E)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_usart.h)(0x61AE221E)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\misc.h)(0x61AE221E)
+F (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\src\stm32f10x_tim.c)(0x61AE221E)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -w-I./RTE/Device/STM32F103TB-I./RTE/_Target_1-IC:/Users/lemenset/AppData/Local/Arm/Packs/ARM/CMSIS/5.8.0/CMSIS/Core/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/StdPeriph_Driver/inc-D__UVISION_VERSION="536" -D_RTE_ -DSTM32F10X_MD -D_RTE_-o ./objects/stm32f10x_tim.o -MD)
+I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_tim.h)(0x61AE221E)
+I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\Include\stm32f10x.h)(0x61AE221E)
+I (RTE\_Target_1\RTE_Components.h)(0x65F45708)
+I (C:\Users\lemenset\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include\core_cm3.h)(0x60D491A2)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x65EB5FB8)
+I (C:\Users\lemenset\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_version.h)(0x60D491A2)
+I (C:\Users\lemenset\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_compiler.h)(0x60D491A2)
+I (C:\Users\lemenset\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_armclang.h)(0x60D491A2)
+I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\Include\system_stm32f10x.h)(0x61AE221E)
+I (RTE\Device\STM32F103TB\stm32f10x_conf.h)(0x61AE221E)
+I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_gpio.h)(0x61AE221E)
+I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_rcc.h)(0x61AE221E)
+I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_usart.h)(0x61AE221E)
+I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\misc.h)(0x61AE221E)
 F (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\src\stm32f10x_usart.c)(0x61AE221E)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -w-I./RTE/Device/STM32F103TB-I./RTE/_Target_1-IC:/Users/lemenset/AppData/Local/Arm/Packs/ARM/CMSIS/5.8.0/CMSIS/Core/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/StdPeriph_Driver/inc-D__UVISION_VERSION="536" -D_RTE_ -DSTM32F10X_MD -D_RTE_-o ./objects/stm32f10x_usart.o -MD)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_usart.h)(0x61AE221E)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\Include\stm32f10x.h)(0x61AE221E)
@@ -207,20 +225,5 @@ I (RTE\Device\STM32F103TB\stm32f10x_conf.h)(0x61AE221E)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_gpio.h)(0x61AE221E)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_rcc.h)(0x61AE221E)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_tim.h)(0x61AE221E)
-I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_usart.h)(0x61AE221E)
-I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\misc.h)(0x61AE221E)
-F (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\src\stm32f10x_tim.c)(0x61AE221E)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m3 -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -w-I./RTE/Device/STM32F103TB-I./RTE/_Target_1-IC:/Users/lemenset/AppData/Local/Arm/Packs/ARM/CMSIS/5.8.0/CMSIS/Core/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/Include-IC:/Users/lemenset/AppData/Local/Arm/Packs/Keil/STM32F1xx_DFP/2.4.0/Device/StdPeriph_Driver/inc-D__UVISION_VERSION="536" -D_RTE_ -DSTM32F10X_MD -D_RTE_-o ./objects/stm32f10x_tim.o -MD)
-I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_tim.h)(0x61AE221E)
-I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\Include\stm32f10x.h)(0x61AE221E)
-I (RTE\_Target_1\RTE_Components.h)(0x65F45708)
-I (C:\Users\lemenset\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include\core_cm3.h)(0x60D491A2)
-I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x65EB5FB8)
-I (C:\Users\lemenset\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_version.h)(0x60D491A2)
-I (C:\Users\lemenset\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_compiler.h)(0x60D491A2)
-I (C:\Users\lemenset\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_armclang.h)(0x60D491A2)
-I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\Include\system_stm32f10x.h)(0x61AE221E)
-I (RTE\Device\STM32F103TB\stm32f10x_conf.h)(0x61AE221E)
-I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_gpio.h)(0x61AE221E)
-I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_rcc.h)(0x61AE221E)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\stm32f10x_usart.h)(0x61AE221E)
 I (C:\Users\lemenset\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.0\Device\StdPeriph_Driver\inc\misc.h)(0x61AE221E)

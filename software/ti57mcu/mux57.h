@@ -1,7 +1,9 @@
 #ifndef mux57_h
 #define mux57_h
 
-#include "state57.h"
+#include "rcl57mcu.h"
+#include <stdint.h>
+
 
 /**
  * Support for TI-57 multidigit LED display and keyboard hardware
@@ -72,7 +74,7 @@
  *            K     K     K     K     K
  *            1     2     3     4     5
  *
- *   SEG E   2ND   INV   LNX   CE    CLR
+ *   SEG E   2ND   INV   LNx   CE    CLR
  *            11    12    13    14    15  <--- scancode
  *
  *   SEG F   LRN   X/T   X^2   vX    1/X
@@ -96,7 +98,7 @@
  *   SEG P   R/S    0     .    +/-    =
  *            81    82    83    84    85
  *
- * The keyboard is scanned simultaneously with the segments - each segment
+ * The keyboard is scanned simultaneously with the display - each segment
  * output (active high) is connected to a row of keyboard switches. Thus,
  * up to 8 rows of switches are supported. Each column of keyboard switches
  * is connected to a column sense line, K1-K5. As each segment line is
@@ -106,104 +108,79 @@
 
 /* Assumes 20 KHz SysTick frequency (50us per tick) */
 
-#define DISPLAY_MASK_BLANK  (0x8)
-#define DISPLAY_MASK_MINUS  (0x1)
-#define DISPLAY_MASK_POINT  (0x2)
-
-#define CHAR_CODE_BLANK (31)
-#define CHAR_CODE_MINUS (30)
 #define CHAR_CODE_POINT (29)
+#define CHAR_CODE_MINUS (30)
+#define CHAR_CODE_BLANK (31)
 
-/** raw keyboard K1-K5 data for each row */
-static unsigned char raw_keyboard_inputs[8];
+/* array type that is digit and mask register */
+typedef uint8_t display_data_t[16];
 
-/** return 0/1 if the specified segment s is to be illuminated in character code c */
-char mux57_is_segment(unsigned char c, unsigned char s);
+/****************************************/
+/* LED Display Cycle related prototypes */
+/****************************************/
 
-/** parse dA (digits) and dB (mask) contents to determine which digits have
- * segment s illuminated
- *
- * The return value contains '1' in the bit positions corresponding to the
- * digits (e.g. digit 1 is bit 0, digit 2 is bit 1, etc) that must be driven.
- *
- * For example:
- *   ti57->dA = 0000000000123000
- *   ti57->dB = 9999999999000999
- *   s = 0 (segment a)
- *
- *   return value is 0b0000000000011000 --> digits 4 and 5 have segment 'a' active
- *
- *                         111000000000
- *                         210987654321 --> digit # (there are only 12 digits!)
- */
-unsigned int mux57_which_digits(ti57_reg_t* digits, ti57_reg_t* mask, unsigned char s);
+/** do a complete display cycle and return key scancode */
+uint8_t hw_display_cycle(display_data_t* digits, display_data_t* mask);
 
-/** parse dA (digits) and dB (mask) contents to determine which digit outputs
- * should have segment s illuminated.
- *
- * The return value contains '1' in the bit positions corresponding to the
- * outputs (e.g. LED1 is bit 0, LED2 is bit 1, etc) that must be driven.
- *
- * TLC5929 Output    :  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11
- * LED Display Digit : 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1
- *
- * TLC5929 outputs 12-15 are not used and should be off (0 in output register)
- *
- */
-unsigned int mux57_which_outputs(ti57_reg_t* digits, ti57_reg_t* mask, unsigned char s);
+/** do a complete display cycle of a single character at digit 12 and return key scancode */
+uint8_t hw_display_char_d12(uint8_t c);
 
-/*************************************************/
-/* RCL-57 PCB V2 LED Segment releated prototypes */
-/*************************************************/
+/** wait for key release - t * 10ms "debounce" */
+void hw_wait_for_key_release(uint32_t t);
 
-/** disable all segment driver PMOS Q's*/
-void hw_segment_disable_all(void);
+/* convert null-terminated string to arrays of display digit and mask codes */
+void mux57_paint_digits(const uint8_t* ins, display_data_t* digits, display_data_t* mask);
+
+/* convert digit display and mask codes to null-terminated string */
+uint8_t* mux57_display_to_str(display_data_t* digits, display_data_t* mask);
+
+/* display a string to LED for n-display cycles */
+void mux57_splash(const uint8_t* ins, unsigned int n);
+
+/**************************************************/
+/* LED display segment driver releated prototypes */
+/**************************************************/
 
 /** enable all segment driver PMOS Q's*/
 void hw_segment_enable_all(void);
 
+/** disable all segment driver PMOS Q's*/
+void hw_segment_disable_all(void);
+
 /** enable one segment driver PMOS Q */
-void hw_segment_enable(unsigned char s);
-
-/** do a complete display cycle and return key scancode */
-unsigned char hw_display_cycle(ti57_reg_t* digits, ti57_reg_t* mask);
-
-/** display a single character at digit 12 */
-unsigned char hw_display_char_d12(unsigned char c);
-
-/** determine key scancode from K1-K5 inputs and specified segment */
-unsigned char hw_read_keyboard_row(unsigned char seg);
-
-/** return the K1-K5 key column inputs obtained during hw_display_cycle or hw_display_char */
-unsigned char hw_raw_keyboard_row(unsigned char s);
+void hw_segment_enable(uint8_t s);
 
 /*************************************************************/
 /* TLC5929 LED Digit Driver related constants and prototypes */
 /*************************************************************/
 
+/* The TLC5929 performs the function of the digit driver. It is a
+ * serially-controlled 16-channel constant current sink. Each digit
+ * cathodes is connected to one of the TLC5929 outputs. Because at
+ * most only one segment per digit is active at a time, each output
+ * needs only to sink approx. 5mA. The TLC5929 was chosen because
+ * it has a power-save mode; when all digit outputs are off (0) the
+ * device consumes less than 40uA of current. Most other serial LED
+ * drivers (e.g. CAT4016) consume several mA of static current at all
+ * times. */
+
 /* TLC5929 control word value:
    b.15 = 1  to enable Power Save mode
      b.0-6 = 64 to set to ~5mA segment sink current */
-#define TLC5929_CONTROL ((1 << 15) + 64)
-
-/* the TLC5929 is used as the digit driver (current sink). It is a
- * serially-controlled 16-channel constant current sink. Each output is
-* connected to one of the digit cathodes. Because at most only one segment
-* per digit is active at a time, each output needs only to sink approx.
-* 5mA. The TLC5929 was chosen because it has a power-save mode; when all
-* digit outputs are off (0) the device consumes less than 40uA of current.
-* Most other serial LED drivers (e.g. CAT4016) consume several mA of static
-* current at all times.
-
-/** reset the TLC5929 digit driver LATCH, CLOCK, and DATA signals */
-void hw_digit_driver_reset(void);
+#define TLC5929_CONTROL ((1 << 15) + 65)
 
 /** Initialize the TLC5929 digit driver IC by turning all outputs off,
  *  setting Global Brightness level to 50%, and enabling Power Save */
 void hw_digit_driver_initialize(void);
 
-/** Shift a serial word into the TLC5929 output driver shift register */
-void hw_digit_driver_load(unsigned int d);
+/** Shift a serial word into the TLC5929 output driver register */
+void hw_digit_driver_load(uint16_t d);
+
+/** Shift a serial word into the TLC5929 configuration register */
+void hw_digit_driver_config(uint16_t d);
+
+/** Set the display dimming via a 'linearized' 0-23 value */
+void hw_digit_driver_intensity(uint8_t i);
 
 /** Update the TLC5929 driver outputs by toggling the LATCH signal */
 void hw_digit_driver_update(void);

@@ -33,6 +33,26 @@ const program_t flash_progs[2] =
     [1].hash = 2
 };
 
+/** Function to obtain a 16-bit hash for program sequences.
+ * This is used mostly to serve as a program "label". */
+
+/* see: https://en.wikipedia.org/wiki/Fletcher%27s_checksum */
+
+unsigned int fletcher16(unsigned int* data, int count)
+{
+    unsigned int sum1 = 0;
+    unsigned int sum2 = 0;
+    int index;
+
+    for (index = 0; index < count; ++index)
+    {
+        sum1 = (sum1 + data[index]) % 255;
+        sum2 = (sum2 + sum1) % 255;
+    }
+
+    return (sum2 << 8) | sum1;
+}
+
 
 void load_user_progs(void);
 {

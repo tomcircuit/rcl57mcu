@@ -1,0 +1,16 @@
+﻿designator,quantity,value,pack,mpn,mount_type
+"C1, C2, C4, C5",4,100nF,C_0805_2012Metric,,smt
+"C3, C6",2,4.7uF,C_0805_2012Metric,,smt
+J1,1,TMC1500 p1-13,PinHeader_1x13_P2.54mm_Vertical,,tht
+J2,1,TMC1500 p28-16,PinHeader_1x13_P2.54mm_Vertical,,tht
+J3,1,STLINK,PinHeader_1x08_P2.00mm_Vertical,,tht
+"Q1, Q2, Q3, Q4",4,DMP2240UDM-7,SOT-23-6,,smt
+R1,1,2K,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,,smt
+R3,1,47K,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,,smt
+R4,1,330,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,,smt
+RN1,1,"YC158TJR-072KL
+",R_Array_Convex_5x0603,,smt
+U1,1,STM32F103TBUx,QFN-36-1EP_6x6mm_P0.5mm_EP4.1x4.1mm,,smt
+U2,1,TLC5929PWP,TSSOP-24-1EP_4.4x7.8mm_P0.65mm_EP3.2x5mm,,smt
+U3,1,TLV70033_SOT23-5,SOT-23-5,,smt
+U4,1,11AA080/TT,SOT-23,,smt

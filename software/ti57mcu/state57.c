@@ -248,14 +248,14 @@ void ti57_clear_program(ti57_t *ti57)
     if (ti57_get_mode(ti57) == TI57_LRN) {
         if (ti57_is_2nd(ti57)) {
             ti57_key_press(ti57, 1, 1);
-            utils57_burst_until_idle(ti57);
+            //utils57_burst_until_idle(ti57);
             ti57_key_release(ti57);
-            utils57_burst_until_idle(ti57);
+            //utils57_burst_until_idle(ti57);
         }
         ti57_key_press(ti57, 2, 1);
-        utils57_burst_until_idle(ti57);
+        //utils57_burst_until_idle(ti57);
         ti57_key_release(ti57);
-        utils57_burst_until_idle(ti57);
+        //utils57_burst_until_idle(ti57);
     }
 
     // Clear steps.
